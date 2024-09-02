@@ -3,8 +3,15 @@ from ultralytics import YOLO # checks, hub
 # checks() # Needed for training with Ultralytics hub
 # hub.login('YOUR API KEY')
 
+#https://github.com/ultralytics/ultralytics/blob/62408aeab82bcb6bd45d2b6f3e3aaa2280a33d11/ultralytics/models/yolo/model.py#L11
+#https://github.com/ultralytics/ultralytics/blob/62408aeab82bcb6bd45d2b6f3e3aaa2280a33d11/ultralytics/engine/model.py#L392
+class BreadAndButterYOLO(YOLO):
+    """Override save method of Model class to set use_dill to False by default."""
+    def save(self, filename="saved_model.pt", use_dill=False):
+        super().save(filename, use_dill=use_dill)
+        
 def main():
-    model = YOLO('yolov8n-seg.pt') #name of pretrained model.
+    model = BreadAndButterYOLO('yolov8n-seg.pt') #name of pretrained model.
     #It will be downloaded, or you can assemble it from scratch, by using .yaml instead of .pt.
     #like this: model = YOLO('yolov8n.yaml')
     #I think not all models are available in pretrained format, so this might be necessary sometimes.
@@ -46,7 +53,7 @@ def main():
         #save_period=-1,            # How often to save. By default saves only best and last.
         workers=4,                 # For loading. I guess that's CPU threads per GPU.
 
-        seed=420420,                # Seed for determinism
+        seed=4204206969,                # Seed for determinism
         #resume=False,              # resume training, if resuming. P.S. Idk how this one works tbh.
 
         #   [Dataset Augmentation]###
