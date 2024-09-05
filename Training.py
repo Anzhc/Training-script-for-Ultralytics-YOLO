@@ -1,7 +1,10 @@
 from ultralytics import YOLO # checks, hub
-
+import os
 # checks() # Needed for training with Ultralytics hub
 # hub.login('YOUR API KEY')
+
+model_name = 'Model Name'
+project_name = 'Project'
 
 def main():
     model = YOLO('yolov8n-seg.pt') #name of pretrained model.
@@ -10,7 +13,9 @@ def main():
     #I think not all models are available in pretrained format, so this might be necessary sometimes.
 
     # They always start with 'yolovX' where X stands for version of yolo model. Right now 8 is most modern.
-    # Sizes: n, s, m, l, x; - from smallest to biggest. i.e. yolov8n for smallest.
+    # Sizes for v8: n, s, m, l, x; - from smallest to biggest. i.e. yolov8n for smallest.
+    # Sizes for v9(DETECTION ONLY): t, s, m, c, e; SEG: c, e.
+    # Sizes for v10(DETECTION ONLY): n, s, m, l, x.
     # Then there are various families of models for various tasks.
     # No classifier - general model for detection.
     # `-seg`- segmentation model.
@@ -27,8 +32,8 @@ def main():
         #[Data and Project setup]
         data='Path\\To\\Your\\Data.yaml',    #Path to your .yaml for dataset
                                                     # or to general folder with train and val subfolders, if classification.
-        name='Model Name',                     #Model name
-        #project=None,              # Folder name, if needed.
+        name=model_name,                     #Model name
+        project=project_name,              # Folder name, if needed.
         exist_ok=True,            # Allow  overwrite or not, if already exist.
         #format=torchscript         # Default format. Don't touch. Or do if you need ONNX or something.
               
@@ -39,7 +44,7 @@ def main():
         #time=None,                 # Max time to train for
         patience=120,               # Amount of epochs to train for before stopping, if no improvement is observed
         cache="ram",                # Caching. None/disk/ram
-        #batch=16,                 # Batch default is 16
+        batch=-1,                 # Batch default is 16. Can be used with -1, or with float 0 - 1. i.e. 0.55, this will use batch corresponding to ~55% VRAM usage.
         device="0",                   # Which GPU to use. Can specify multiple, but they are unlikely to work.
         #rect=True,                 # Optimize batches for minimal padding. Can hurt accuracy.
         save=True,                  # Save model
@@ -53,20 +58,21 @@ def main():
         hsv_h=0.35,                  # Hue randomization in training, if needed. Don't use for color-critical models.
         hsv_s=0.25,                  # Saturation randomization. Don't use for color-critical models.
         hsv_v=0.15,                  # Value randomization. Don't use for color-critical models.
+        #bgr = 0.5,                  # Change rgb channels to bgr.
         degrees=45,                 # Max random rotation degree. Don't use for orientation-critical model.
         flipud=0.25,                # Flip upside-down chance. Don't use for orientation-critical models.
         fliplr=0.5,                 # Flip left-right chance. Don't use for orientiation-critical models.
-        translate=0.1,              # Translation of image during training(?).
+        #translate=0.1,              # Translation of image during training(?).
         scale=0.5,                  # Random scaling of images.
         #shear=0.0,                  # Shear(?)
-        perspective=0.0005,            # Ultralytics suggested range 0 to 0.001.
+        #perspective=0.0005,            # Ultralytics suggested range 0 to 0.001.
         #mixup=0.0,                  # Mixup(?)
-        copy_paste=0.0,             # Probability of copy-paste of segment instances.
+        #copy_paste=0.0,             # Probability of copy-paste of segment instances.
         #auto_augment="randaugment", # Automatic mode for augments. Values: "randaugment", "autoaugment", "augmix"
-        erasing=0.0,                # Probability of random erasing during CLASSIFICATION training.
+        #erasing=0.0,                # Probability of random erasing during CLASSIFICATION training.
         mosaic=1,                   # Mosaic. Rearranges images and data in batch to strongly augment it.
         
-        close_mosaic=10,            # Stop mosaic augment for last N epochs.
+        close_mosaic=0,            # Stop mosaic augment for last N epochs.
 
         # [Other Dataset Settings]###
         #fraction=1.0,              # Fraction of dataset to train on.
@@ -86,7 +92,7 @@ def main():
         single_cls=False,           # Single class training.If you want your multi-class dataqsets to be trated as single.
         mask_ratio=1,               # Downsample of segmentation masks. Default is 4.
         deterministic=True,         # Determinism.
-        #dropout=0.0,               # Dropout.
+        #dropout=0.1,               # Dropout.
 
         #[Advanced Training Params]##
         freeze=None,                # Freeze first N layers, or specific layers by index.
@@ -101,7 +107,8 @@ def main():
 
         #retina_masks=Flase,        # This is not in ultralytics docs in training params. If works, will heavily affect results
                                         # as it will draw masks at resolution of image, instead of 160x160.
-
+        #multi_scale=False,          #Training in variable size. i.e. 640 training could range from some ~250px to ~850px or so.
+        #WARNING: Unstable VRAM usage. High possibility of OOM, if close to limit.
         #          [Optimizations]###
         amp=True,                   # Automatic Mixed Precision. 
 
@@ -130,9 +137,20 @@ def main():
         #dnn=False                  # No idea.
         #save_hybrid=False          # No idea.
         #save_json=False            # No idea.
-        #split=val                  # No idea.
 
     )
+
+    #This section is for additional saving of model WITHOUT `dill` serialization.
+    #Also renames it according to set name.
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    best_path = os.path.join(base_path, project_name, model_name, 'weights', 'best.pt')
+    last_path = os.path.join(base_path, project_name, model_name, 'weights', 'last.pt')
+    best_save_path = os.path.join(base_path, project_name, model_name, 'weights', f'{model_name}_no_dill_best.pt')
+    last_save_path = os.path.join(base_path, project_name, model_name, 'weights', f'{model_name}_no_dill_last.pt')
+    best_model = YOLO(best_path)
+    last_model = YOLO(last_path)
+    best_model.save(filename=best_save_path, use_dill=False)
+    last_model.save(filename=last_save_path, use_dill=False)
 
 
 if __name__ == '__main__':
