@@ -25,7 +25,9 @@ def main():
 
     # They always start with 'yolovX' where X stands for version of yolo model. For yolo11 "n" is ommited: "yolo11X"
     # Right now 11 is most modern. v8 and v11 should be supporting same sizes and modes, possibly direct upgrade path.
-    # Sizes: n, s, m, l, x; - from smallest to biggest. i.e. yolov8n for smallest. Also c and e for v9.
+    # Sizes for v8 and 11: n, s, m, l, x; - from smallest to biggest. i.e. yolov8n for smallest.
+    # Sizes for v9(DETECTION ONLY): t, s, m, c, e; SEG: c, e.
+    # Sizes for v10(DETECTION ONLY): n, s, m, l, x.
     # Then there are various families of models for various tasks.
     # No classifier - general model for detection.
     # `-seg`- segmentation model.
