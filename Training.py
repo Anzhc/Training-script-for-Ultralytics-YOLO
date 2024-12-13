@@ -7,8 +7,8 @@ import sys
 # hub.login('YOUR API KEY')
 
 ultralytics_version = ultralytics.__version__
-if version.parse(ultralytics_version) == version.parse("8.3.41") or version.parse(ultralytics_version) == version.parse("8.3.42"):
-    print("WARNING: Versions 8.3.41 and 8.3.42 are compromised with cryto miner. REINSTALL ULTRALYTICS.")
+if version.parse(ultralytics_version) == version.parse("8.3.41") or version.parse(ultralytics_version) == version.parse("8.3.42") or version.parse(ultralytics_version) == version.parse("8.3.45") or version.parse(ultralytics_version) == version.parse("8.3.46"):
+    print("WARNING: Versions 8.3.41, 8.3.42, 8.3.45 and 8.3.46 are compromised with cryto miner. REINSTALL ULTRALYTICS.")
     print("TERMINATING")
     sys.exit()
 
